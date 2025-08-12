@@ -3,16 +3,29 @@ workflows:
     name: Build iOS MJPEG Camera
     environment:
       vars:
-        XCODE_PROJECT: "CameraServer.xcodeproj"
-        XCODE_SCHEME: "CameraServer"
+        # --- MODIFICAT ---
+        # Aici specificăm calea corectă către fișierul de proiect.
+        # Acesta se află în interiorul folderului CameraStreamer.
+        XCODE_PROJECT: "CameraStreamer/CameraStreamer.xcodeproj"
+        
+        # --- MODIFICAT ---
+        # Și numele corect al schemei, care de obicei este identic 
+        # cu numele proiectului.
+        XCODE_SCHEME: "CameraStreamer"
       xcode: latest
     scripts:
       - name: Build .ipa
         script: |
           set -e
-          xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -sdk iphoneos -configuration Release archive -archivePath build/CameraServer.xcarchive CODE_SIGN_IDENTITY='' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO || true
-          if [ -d build/CameraServer.xcarchive ]; then
-            xcodebuild -exportArchive -archivePath build/CameraServer.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath build || true
-          fi
+          
+          # --- MODIFICAT și ÎMBUNĂTĂȚIT ---
+          # Folosim variabila XCODE_SCHEME pentru a numi arhiva.
+          # Astfel, dacă schimbi numele schemei, se schimbă automat și aici.
+          ARCHIVE_PATH="build/${XCODE_SCHEME}.xcarchive"
+          
+          xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -sdk iphoneos -configuration Release archive -archivePath "$ARCHIVE_PATH" CODE_SIGN_IDENTITY='' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          
+          xcodebuild -exportArchive -archivePath "$ARCHIVE_PATH" -exportOptionsPlist ExportOptions.plist -exportPath build
+          
     artifacts:
       - build/*.ipa
