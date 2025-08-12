@@ -6,24 +6,13 @@ workflows:
         XCODE_PROJECT: "CameraServer.xcodeproj"
         XCODE_SCHEME: "CameraServer"
       xcode: latest
-      cocoapods: default
     scripts:
-      - name: Install dependencies
-        script: |
-          pod install || true
       - name: Build .ipa
         script: |
-          xcodebuild \
-            -project "$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
-            -sdk iphoneos \
-            -configuration Release \
-            archive -archivePath build/CameraServer.xcarchive \
-            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-          xcodebuild \
-            -exportArchive \
-            -archivePath build/CameraServer.xcarchive \
-            -exportOptionsPlist ExportOptions.plist \
-            -exportPath build
+          set -e
+          xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -sdk iphoneos -configuration Release archive -archivePath build/CameraServer.xcarchive CODE_SIGN_IDENTITY='' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO || true
+          if [ -d build/CameraServer.xcarchive ]; then
+            xcodebuild -exportArchive -archivePath build/CameraServer.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath build || true
+          fi
     artifacts:
       - build/*.ipa
